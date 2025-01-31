@@ -1,6 +1,7 @@
 package com.example.employeemanagementsys.Controller;
 
 
+import com.example.employeemanagementsys.Dto.DepartmentRequest;
 import com.example.employeemanagementsys.Dto.DepartmentResponse;
 import com.example.employeemanagementsys.Service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class DepartmentController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<DepartmentResponse> createDepartment(@RequestBody DepartmentRequest request) {
+    public ResponseEntity<?> createDepartment(@RequestBody DepartmentRequest request) {
         try {
             return ResponseEntity.ok(departmentService.createDepartment(request));
         } catch (Exception e) {

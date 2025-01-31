@@ -63,20 +63,29 @@ public class EmployeeService {
         return response;
     }
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
-        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new RuntimeException("Employee not found"));
-        employee.setName(request.getName());
-        employee.setEmail(request.getEmail());
-        employee.setPhone(request.getPhone());
-        employee.setSalary(request.getSalary());
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        if (request.getName() != null) {
+            employee.setName(request.getName());
+        }
+        if (request.getEmail() != null) {
+            employee.setEmail(request.getEmail());
+        }
+        if (request.getPhone() != null) {
+            employee.setPhone(request.getPhone());
+        }
+        if (request.getSalary() != null) {
+            employee.setSalary(request.getSalary());
+        }
         if (request.getDepartmentId() != null) {
             Department department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department not found"));
             employee.setDepartment(department);
         }
+
         Employee updatedEmployee = employeeRepository.save(employee);
         return mapToEmployeeResponse(updatedEmployee);
-
-
-
     }
+
 }

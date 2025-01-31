@@ -1,7 +1,7 @@
 package com.example.employeemanagementsys.Service;
 
 
-import com.example.employeemanagementsys.Controller.DepartmentRequest;
+import com.example.employeemanagementsys.Dto.DepartmentRequest;
 import com.example.employeemanagementsys.Dto.DepartmentResponse;
 import com.example.employeemanagementsys.Repository.DepartmentRepository;
 import com.example.employeemanagementsys.Tables.Department;
@@ -9,6 +9,7 @@ import com.example.employeemanagementsys.Tables.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +38,18 @@ public class DepartmentService {
     }
 
     public DepartmentResponse updateDepartment(Long id, DepartmentRequest request) {
-        Department department = departmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Department not found"));
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Department not found"));
         department.setName(request.getName());
         Department updatedDepartment = departmentRepository.save(department);
         return mapToDepartmentResponse(updatedDepartment);
     }
 
+
     public void deleteDepartment(Long id) {
+        if (!departmentRepository.existsById(id)) {
+            throw new RuntimeException("Department not found");
+        }
         departmentRepository.deleteById(id);
     }
 
@@ -52,7 +58,13 @@ public class DepartmentService {
         DepartmentResponse response = new DepartmentResponse();
         response.setId(department.getId());
         response.setName(department.getName());
-        response.setEmployeeNames(department.getEmployees().stream().map(Employee::getName).collect(Collectors.toList()));
+
+
+        List<String> employeeNames = department.getEmployees() != null ?
+                department.getEmployees().stream().map(Employee::getName).collect(Collectors.toList()): Collections.emptyList();
+
+        response.setEmployeeNames(employeeNames);
         return response;
     }
+
 }

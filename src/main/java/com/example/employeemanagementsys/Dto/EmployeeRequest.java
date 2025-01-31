@@ -1,6 +1,8 @@
 package com.example.employeemanagementsys.Dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EmployeeRequest {
     private String name;
     private String email;

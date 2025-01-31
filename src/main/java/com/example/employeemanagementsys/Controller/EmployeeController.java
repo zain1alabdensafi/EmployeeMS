@@ -46,7 +46,7 @@ public class EmployeeController {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PatchMapping("/update/{id}")
     public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable Long id, @RequestBody EmployeeRequest request) {
         try {
             return ResponseEntity.ok(employeeService.updateEmployee(id, request));
@@ -54,6 +54,7 @@ public class EmployeeController {
             return ResponseEntity.status(500).build();
         }
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
