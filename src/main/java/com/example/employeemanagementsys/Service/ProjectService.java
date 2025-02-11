@@ -1,10 +1,9 @@
 package com.example.employeemanagementsys.Service;
 
-
-
 import com.example.employeemanagementsys.Dto.EmployeeProjectRequest;
 import com.example.employeemanagementsys.Dto.ProjectRequest;
 import com.example.employeemanagementsys.Dto.ProjectResponse;
+import com.example.employeemanagementsys.Exceptions.ResourceNotFoundException;
 import com.example.employeemanagementsys.Repository.DepartmentRepository;
 import com.example.employeemanagementsys.Repository.EmployeeProjectRepository;
 import com.example.employeemanagementsys.Repository.EmployeeRepository;
@@ -13,6 +12,7 @@ import com.example.employeemanagementsys.Tables.Department;
 import com.example.employeemanagementsys.Tables.Employee;
 import com.example.employeemanagementsys.Tables.EmployeeProject;
 import com.example.employeemanagementsys.Tables.Project;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,8 +35,7 @@ public class ProjectService {
 
 
     public ProjectResponse addProject(ProjectRequest request) {
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+        Department department = getDepartmentById(request.getDepartmentId());
 
         Project project = Project.builder()
                 .name(request.getName())
@@ -58,18 +57,14 @@ public class ProjectService {
 
 
     public ProjectResponse getProjectById(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+        Project project = getProjectByIdOrThrow(id);
         return mapToResponse(project);
     }
 
 
     public ProjectResponse updateProject(Long id, ProjectRequest request) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+        Project project = getProjectByIdOrThrow(id);
+        Department department = getDepartmentById(request.getDepartmentId());
 
         project.setName(request.getName());
         project.setDescription(request.getDescription());
@@ -82,9 +77,23 @@ public class ProjectService {
 
     public void deleteProject(Long id) {
         if (!projectRepository.existsById(id)) {
-            throw new RuntimeException("Project not found");
+            throw new ResourceNotFoundException("Project with ID " + id + " not found");
         }
         projectRepository.deleteById(id);
+    }
+
+
+    public void addEmployeeToProject(Long projectId, Long employeeId, EmployeeProjectRequest request) {
+        Project project = getProjectByIdOrThrow(projectId);
+        Employee employee = getEmployeeById(employeeId);
+
+        EmployeeProject employeeProject = new EmployeeProject();
+        employeeProject.setEmployee(employee);
+        employeeProject.setProject(project);
+        employeeProject.setRole(request.getRole());
+        employeeProject.setStartDate(request.getStartDate());
+
+        employeeProjectRepository.save(employeeProject);
     }
 
 
@@ -97,24 +106,21 @@ public class ProjectService {
         return response;
     }
 
-    public void addEmployeeToProject(Long projectId, Long employeeId, EmployeeProjectRequest request) {
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-
-
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-
-        EmployeeProject employeeProject = new EmployeeProject();
-        employeeProject.setEmployee(employee);
-        employeeProject.setProject(project);
-        employeeProject.setRole(request.getRole());
-        employeeProject.setStartDate(request.getStartDate());
-
-        employeeProjectRepository.save(employeeProject);
+    private Project getProjectByIdOrThrow(Long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project with ID " + id + " not found"));
     }
 
-}
 
+    private Employee getEmployeeById(Long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee with ID " + id + " not found"));
+    }
+
+
+    private Department getDepartmentById(Long id) {
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Department with ID " + id + " not found"));
+    }
+}

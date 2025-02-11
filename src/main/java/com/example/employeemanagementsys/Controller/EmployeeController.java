@@ -1,6 +1,5 @@
 package com.example.employeemanagementsys.Controller;
 
-
 import com.example.employeemanagementsys.Dto.EmployeeRequest;
 import com.example.employeemanagementsys.Dto.EmployeeResponse;
 import com.example.employeemanagementsys.Service.EmployeeService;
@@ -19,50 +18,27 @@ public class EmployeeController {
 
     @GetMapping("/viewall")
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
-        try {
-            return ResponseEntity.ok(employeeService.getAllEmployees());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+        return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
     @GetMapping("/view/{id}")
     public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable Long id) {
-        try {
-            return employeeService.getEmployeeById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+        return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     @PostMapping("/create")
     public ResponseEntity<EmployeeResponse> createEmployee(@RequestBody EmployeeRequest request) {
-        try {
-            return ResponseEntity.ok(employeeService.createEmployee(request));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+        return ResponseEntity.ok(employeeService.createEmployee(request));
     }
 
     @PatchMapping("/update/{id}")
     public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable Long id, @RequestBody EmployeeRequest request) {
-        try {
-            return ResponseEntity.ok(employeeService.updateEmployee(id, request));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+        return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
-
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        try {
-            employeeService.deleteEmployee(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
+        employeeService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
     }
 }
