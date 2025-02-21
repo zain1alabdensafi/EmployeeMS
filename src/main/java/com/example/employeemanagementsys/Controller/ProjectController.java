@@ -59,8 +59,10 @@ public class ProjectController {
 
 
     @PostMapping("/{projectId}/employees/{employeeId}")
-    public ResponseEntity<String> addEmployeeToProject(@PathVariable Long projectId, @PathVariable Long employeeId, @RequestBody EmployeeProjectRequest request) {
-        projectService.addEmployeeToProject(projectId, employeeId, request);
+    public ResponseEntity<String> addEmployeeToProject(@PathVariable Long projectId,@PathVariable Long employeeId, @RequestBody EmployeeProjectRequest request)
+    {
+        projectService.addEmployeeToProject(projectId, employeeId, request.getRole());
+
         return ResponseEntity.status(HttpStatus.CREATED).body("Employee added to project successfully");
     }
 

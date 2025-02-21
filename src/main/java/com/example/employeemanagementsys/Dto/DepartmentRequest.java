@@ -1,6 +1,9 @@
 package com.example.employeemanagementsys.Dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class DepartmentRequest {
+    @NotBlank(message = "Department name cannot be blank")
     private String name;
 
     public void setName(String name) {
@@ -9,6 +12,5 @@ public class DepartmentRequest {
     public String getName() {
         return name;
     }
-
 }
 

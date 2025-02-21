@@ -5,23 +5,27 @@ import com.example.employeemanagementsys.Dto.EmployeeResponse;
 import com.example.employeemanagementsys.Exceptions.ResourceNotFoundException;
 import com.example.employeemanagementsys.Repository.DepartmentRepository;
 import com.example.employeemanagementsys.Repository.EmployeeRepository;
+import com.example.employeemanagementsys.Service.Validation.ObjectValidator;
 import com.example.employeemanagementsys.Tables.Department;
 import com.example.employeemanagementsys.Tables.Employee;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
+    private final ObjectValidator<EmployeeRequest> objectValidator;
+
+    public EmployeeService(EmployeeRepository employeeRepository,
+                           DepartmentRepository departmentRepository,
+                           ObjectValidator<EmployeeRequest> objectValidator) {
+        this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
+        this.objectValidator = objectValidator;
+    }
 
     public List<EmployeeResponse> getAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
@@ -38,9 +42,7 @@ public class EmployeeService {
     }
 
     public EmployeeResponse createEmployee(EmployeeRequest request) {
-        if (request.getName() == null || request.getEmail() == null || request.getPhone() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request: Name, Email, and Phone are required");
-        }
+        objectValidator.validate(request);
 
         Employee employee = new Employee();
         employee.setName(request.getName());
@@ -48,11 +50,9 @@ public class EmployeeService {
         employee.setPhone(request.getPhone());
         employee.setSalary(request.getSalary());
 
-        if (request.getDepartmentId() != null) {
-            Department department = departmentRepository.findById(request.getDepartmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Department with ID " + request.getDepartmentId() + " not found"));
-            employee.setDepartment(department);
-        }
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Department with ID " + request.getDepartmentId() + " not found"));
+        employee.setDepartment(department);
 
         Employee savedEmployee = employeeRepository.save(employee);
         return mapToEmployeeResponse(savedEmployee);
@@ -66,21 +66,16 @@ public class EmployeeService {
     }
 
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
+        objectValidator.validate(request);
+
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee with ID " + id + " not found"));
 
-        if (request.getName() != null) {
-            employee.setName(request.getName());
-        }
-        if (request.getEmail() != null) {
-            employee.setEmail(request.getEmail());
-        }
-        if (request.getPhone() != null) {
-            employee.setPhone(request.getPhone());
-        }
-        if (request.getSalary() != null) {
-            employee.setSalary(request.getSalary());
-        }
+        if (request.getName() != null) employee.setName(request.getName());
+        if (request.getEmail() != null) employee.setEmail(request.getEmail());
+        if (request.getPhone() != null) employee.setPhone(request.getPhone());
+        if (request.getSalary() != null) employee.setSalary(request.getSalary());
+
         if (request.getDepartmentId() != null) {
             Department department = departmentRepository.findById(request.getDepartmentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Department with ID " + request.getDepartmentId() + " not found"));
@@ -98,13 +93,7 @@ public class EmployeeService {
         response.setEmail(employee.getEmail());
         response.setPhone(employee.getPhone());
         response.setSalary(employee.getSalary());
-
-        if (employee.getDepartment() != null) {
-            response.setDepartmentName(employee.getDepartment().getName());
-        } else {
-            response.setDepartmentName("No department assigned");
-        }
-
+        response.setDepartmentName(employee.getDepartment() != null ? employee.getDepartment().getName() : "No department assigned");
         return response;
     }
 }

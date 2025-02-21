@@ -8,5 +8,8 @@ public class ProjectResponse {
     private String name;
     private String description;
     private String departmentName;
+
+    public ProjectResponse(Long id, String name, String description, String name1) {
+    }
 }
 
